@@ -1,0 +1,71 @@
+servers = [
+    {
+        :name => "k8s-master",
+        :type => "master",
+        :box => "centos/7",
+        :eth1 => "192.168.205.10",
+        :mem => "3048",
+        :cpu => "4"
+    },
+    {
+        :name => "node-01",
+        :type => "node",
+        :box => "centos/7",
+        :eth1 => "192.168.205.11",
+        :mem => "2048",
+        :cpu => "2"
+    },
+    {
+        :name => "node-02",
+        :type => "node",
+        :box => "centos/7",
+        :eth1 => "192.168.205.12",
+        :mem => "2048",
+        :cpu => "2"
+    }
+]
+
+
+Vagrant.configure("2") do |config|
+
+    servers.each do |opts|
+        config.vm.define opts[:name] do |config|
+
+            config.vm.box = opts[:box]
+            config.vm.hostname = opts[:name]
+            config.vm.network :private_network, ip: opts[:eth1]
+
+            config.vm.provider "virtualbox" do |v|
+                v.name = opts[:name]
+                v.customize ["modifyvm", :id, "--groups", "/Ballerina Development"]
+                v.customize ["modifyvm", :id, "--memory", opts[:mem]]
+                v.customize ["modifyvm", :id, "--cpus", opts[:cpu]]
+            end
+            config.vm.provision "ansible" do |ansible|
+                ansible.playbook = "kubernetes-setup/setup-playbook.yml"
+                ansible.extra_vars = {
+                    node_ip: opts[:eth1],
+                }
+            end
+
+            if opts[:type] == "master"
+                config.vm.provision "ansible" do |ansible|
+                    ansible.playbook = "kubernetes-setup/master-playbook.yml"
+                    ansible.extra_vars = {
+                        node_ip: opts[:eth1],
+                    }
+                end
+            else
+                config.vm.provision "ansible" do |ansible|
+                    ansible.playbook = "kubernetes-setup/node-playbook.yml"
+                    ansible.extra_vars = {
+                        node_ip: opts[:eth1],
+                    }
+                end
+            end
+
+        end
+
+    end
+
+end
