@@ -1,0 +1,14 @@
+{
+    "cSpell.words": [
+        "chown",
+        "firewalld",
+        "fstab",
+        "kube",
+        "kubeadm",
+        "kubectl",
+        "kubernetes",
+        "swapoff",
+        "sysctl",
+        "systemctl"
+    ]
+}

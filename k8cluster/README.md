@@ -25,22 +25,32 @@ cd <repo_path>/k8cluster
 ```bash
 vagrant up
 ```
-
-### validate
-
-- login to master and list k8s nodes
-
-```bash
-vagrant ssh k8s-master
-```
-
-- From server
-
-```bash
->kubectl get nodes
-NAME         STATUS   ROLES    AGE     VERSION
-k8s-master   Ready    master   7m13s   v1.17.2
-node-01      Ready    <none>   5m1s    v1.17.2
-node-02      Ready    <none>   2m47s   v1.17.2
-
-```
+It will create `cred.txt` file with K8s details. you can start using K8s API from your host machine by following these instructions
+- Using K8s API
+  - `source ./kubernetes-setup/cred.txt`
+  - `curl $KUBE_API_EP/api --header "Authorization: Bearer $KUBE_API_TOKEN" --insecure`
+- Using `kubectl`
+  - Setting up credentials
+    ```bash
+    kubectl config set-credentials deployer/my-cluster --token $KUBE_API_TOKEN
+    ```
+  - pointing to Cluster
+    ```bash
+    kubectl config set-cluster my-cluster --insecure-skip-tls-verify=true --server=$KUBE_API_EP
+    ```
+  - Create Context
+    ```bash
+    kubectl config set-context default/my-cluster/deployer --user=deployer/my-cluster --namespace=default --cluster=my-cluster
+    ```
+  - Use the above created context
+    ```bash
+    kubectl config use-context default/my-cluster/deployer
+    ```
+  - List node
+    ```bash
+    >kubectl get nodes
+    NAME         STATUS   ROLES    AGE     VERSION
+    k8s-master   Ready    master   7m13s   v1.17.2
+    node-01      Ready    <none>   5m1s    v1.17.2
+    node-02      Ready    <none>   2m47s   v1.17.2
+    ```

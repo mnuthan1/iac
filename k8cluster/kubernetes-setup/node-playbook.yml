@@ -1,6 +1,20 @@
 - hosts: all
   become: yes
   tasks:
+    - name: enable node ports
+      firewalld:
+        port: "{{ item }}"
+        permanent: yes
+        state: enabled
+      loop:
+        - 10250/tcp
+        - 30000-32767/tcp
+    - name: reload firewalld service
+      service:
+        name: firewalld
+        enabled: yes
+        daemon_reload: yes
+        state: restarted
     - name: Disable SWAP since kubernetes can't work with swap enabled (1/2)
       shell: |
         swapoff -a

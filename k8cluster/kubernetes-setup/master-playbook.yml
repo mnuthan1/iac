@@ -1,6 +1,25 @@
+#Ansible play book for configuring K8 Master
 - hosts: k8s-master
   become: yes
   tasks:
+    - name: enable master ports
+      firewalld:
+        port: "{{ item }}"
+        permanent: yes
+        state: enabled
+      loop:
+        - 6443/tcp
+        - 2379-2380/tcp
+        - 10250/tcp
+        - 10252/tcp
+        - 10255/tcp
+    - name: reload firewalld service
+      service:
+        name: firewalld
+        enabled: yes
+        daemon_reload: yes
+        state: restarted
+
     - name: Disable SWAP since kubernetes can't work with swap enabled (1/2)
       shell: |
         swapoff -a
@@ -13,7 +32,7 @@
     - name: initialize the cluster
       command: kubeadm init --apiserver-advertise-address="{{ node_ip }}" --apiserver-cert-extra-sans="{{ node_ip }}" --pod-network-cidr=192.168.0.0/16
 
-    - name: Setup kubeconfig for vagrant user
+    - name: Setup kube config for vagrant user
       command: "{{ item }}"
       with_items:
         - mkdir -p /home/vagrant/.kube
@@ -22,7 +41,7 @@
 
     - name: install Pod network
       become: false
-      command: kubectl apply -f https://docs.projectcalico.org/v3.9/manifests/calico.yaml
+      command: kubectl apply -f https://docs.projectcalico.org/v3.11/manifests/calico.yaml
 
     - name: Generate join command
       command: kubeadm token create --print-join-command
@@ -30,5 +49,70 @@
 
     - name: Copy join command to local file
       local_action: copy content="{{ join_command.stdout_lines[0] }}" dest="./join-command"
+      vars:
+        ansible_become: no
+# create SA with cluster admin access,
+# which can be used to connect to cluster from outside
+# https://medium.com/faun/manually-connect-to-your-kubernetes-cluster-from-the-outside-d852346a7f0a
+   
+    - name: Create a K8 Service account with cluster admin access
+      shell: |
+        kubectl create sa deployer
+        kubectl create clusterrolebinding deployer --clusterrole cluster-admin --serviceaccount default:deployer
+      register: task_register_var
+      until: task_register_var is not failed
+      retries: 5
+      delay: 10
+      vars:
+        ansible_become: no
+    - name: Get KUBE_DEPLOY_SECRET_NAME
+      command: kubectl get sa deployer -o jsonpath='{.secrets[0].name}'
+      register: KUBE_DEPLOY_SECRET_NAME
+      vars:
+        ansible_become: no
+    - name: Get KUBE_API_EP
+      command: kubectl get ep -o jsonpath='{.items[0].subsets[0].addresses[0].ip}'
+      register: KUBE_API_EP
+      vars:
+        ansible_become: no
+    - name: Get KUBE_API_PROTOCAL
+      command: kubectl get ep -o jsonpath='{.items[0].subsets[0].ports[0].name}'
+      register: KUBE_API_PROTOCAL
+      vars:
+        ansible_become: no
+    - name: Get KUBE_API_PORT
+      command: kubectl get ep -o jsonpath='{.items[0].subsets[0].ports[0].port}'
+      register: KUBE_API_PORT
+      vars:
+        ansible_become: no
+    - name: Get KUBE_API_TOKEN
+      shell: | 
+        kubectl get secret `kubectl get sa deployer -o jsonpath='{.secrets[0].name}'` -o jsonpath='{.data.token}'|base64 --decode
+      register: KUBE_API_TOKEN
+      vars:
+        ansible_become: no
+    - name: Get KUBE_API_CERT
+      shell: |
+        kubectl get secret `kubectl get sa deployer -o jsonpath='{.secrets[0].name}'`  -o jsonpath='{.data.ca\.crt}'|base64 --decode
+      register: KUBE_API_CERT
+      vars:
+        ansible_become: no
+    - name: create cred.txt file
+      file:
+        dest: ./cred.txt
+        state: touch
+      delegate_to: localhost
+      vars:
+        ansible_become: no
+    - name: Write K8 credentials to cred.txt
+      blockinfile:
+        dest: "./cred.txt"
+        block: |
+          export KUBE_DEPLOY_SECRET_NAME={{ KUBE_DEPLOY_SECRET_NAME.stdout_lines[0] }}
+          export KUBE_API_EP={{KUBE_API_PROTOCAL.stdout_lines[0]}}://{{ KUBE_API_EP.stdout_lines[0] }}:{{KUBE_API_PORT.stdout_lines[0]}}
+          export KUBE_API_CERT={{ KUBE_API_CERT.stdout_lines }}
+          export KUBE_API_TOKEN={{ KUBE_API_TOKEN.stdout_lines[0] }}
+        insertafter: EOF
+      delegate_to: localhost 
       vars:
         ansible_become: no
