@@ -1,3 +1,4 @@
+# Ansible playbook to setup all nodes in cluster.
 - hosts: all
   become: true
   tasks:
@@ -39,24 +40,6 @@
         enabled: yes
         daemon_reload: yes
         state: started
-    
-    - name: enable ports
-      firewalld:
-        port: "{{ item }}"
-        permanent: yes
-        state: enabled
-      loop:
-        - 6443/tcp
-        - 2379-2380/tcp
-        - 10250/tcp
-        - 10252/tcp
-        - 10255/tcp
-    - name: reload firewalld service
-      service:
-        name: firewalld
-        enabled: yes
-        daemon_reload: yes
-        state: restarted
 
     - name: ensure net.bridge.bridge-nf-call-ip6tables is set to 1
       sysctl:
@@ -94,7 +77,7 @@
         enabled: yes
         daemon_reload: yes
         state: restarted
-
+# only for k8 master install kubectl
 - hosts: k8s-master
   become: yes
   tasks:
