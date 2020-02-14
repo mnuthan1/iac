@@ -1,0 +1,33 @@
+---
+    - name: "Playiing ansible spinnaker install playbook"
+      hosts: localhost
+      connection: local
+      tasks:
+        - name: "Create Spinnkaer Service accounts"
+          shell: "kubectl apply -f ./manifests/spin_acct.yml"
+        - name: "Create Spinnkaer namespace"
+          shell: "kubectl apply -f ./manifests/spin_namespace.yml"
+        - name: "Create Spinnkaer services"
+          shell: "kubectl apply -f ./manifests/spin_svcs.yml"
+
+        - name: "Create halyard deployment in default namespace"
+          shell: "kubectl apply -f ./manifests/hal_deploy.yml"
+
+        - name: "Configure halyard with k8s cluster"
+          shell: "kubectl apply -f ./manifests/hal_deploy.yml"
+        - name: "Configure halyard with k8s cluster"
+          shell: |
+            kubectl get pods |grep hal |cut -f1 -d\  |\
+            while read pod; \
+            do echo "$pod writing:";\
+              kubectl exec -t $pod -- bash -c \
+              "cd ;\
+              kubectl config set-cluster default --server=https://kubernetes.default --certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt;\
+              kubectl config set-context default --cluster=default;\
+              token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token);\
+              kubectl config set-credentials user --token=$token;\
+              kubectl config set-context default --user=user;\
+              kubectl config use-context default"
+            done
+        
+          

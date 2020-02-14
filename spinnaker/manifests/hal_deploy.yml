@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: halyard-deployment
+  labels:
+    app: hal
+  name: hal
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hal
+  template:
+    metadata:
+      labels:
+        app: hal
+    spec:
+      serviceAccountName: spinnaker-service-account
+      containers:
+      - name: halyard
+        image: gcr.io/spinnaker-marketplace/halyard:stable

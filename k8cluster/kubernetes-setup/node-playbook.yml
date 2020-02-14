@@ -28,6 +28,23 @@
         systemctl enable docker.service
     - name: Copy the join command to server location
       copy: src=join-command dest=/tmp/join-command.sh mode=0777
-
+    # add node ip as vagrant provides two interfaces
+    - name: include node-ip in kubelet
+      lineinfile: 
+        path: /etc/sysconfig/kubelet 
+        regexp: '^KUBELET_EXTRA_ARGS='
+        line:  KUBELET_EXTRA_ARGS=--node-ip={{node_ip}}
+    #######################
+    # incase of wrong ip in kubectl get nodes -o wide un comment below lines and try
+    #######################
+    #- name: include node-ip in kubelet
+    #  lineinfile:
+    #    path: /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf
+    #    insertbefore: '^ExecStart='
+    #    line: Environment="KUBELET_EXTRA_ARGS=--node-ip={{node_ip}}"
+    - name: reload kubelet
+      shell: |
+        systemctl daemon-reload
+        systemctl restart kubelet
     - name: Join the node to cluster
       command: sh /tmp/join-command.sh
