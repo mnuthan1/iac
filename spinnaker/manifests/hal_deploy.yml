@@ -23,7 +23,7 @@ spec:
         lifecycle:
             postStart:
               exec:
-                command:
+                command: #configure hal pod with k8 cluster
                   - "sh"
                   - "-c"
                   - >
