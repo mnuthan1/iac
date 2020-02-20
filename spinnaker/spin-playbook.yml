@@ -3,10 +3,11 @@
       hosts: localhost
       connection: local
       tasks:
-        - name: "Create Spinnkaer Service accounts"
-          shell: "kubectl apply -f ./manifests/spin_acct.yml"
+       
         - name: "Create Spinnkaer namespace"
           shell: "kubectl apply -f ./manifests/spin_namespace.yml"
+        - name: "Create Spinnkaer Service accounts"
+          shell: "kubectl apply -f ./manifests/spin_acct.yml"
         - name: "Create Spinnkaer services"
           shell: "kubectl apply -f ./manifests/spin_svcs.yml"
         - name: Create k8 configmap for wrapper scripts
