@@ -28,10 +28,17 @@ spec:
                   - "-c"
                   - >
                     cd &&
-                    /scripts/halyard_pod_config_kubectl.sh
+                    /scripts/halyard_pod_config_kubectl.sh &&
+                    /scripts/install_helm.sh
         volumeMounts:
         - name: wrapper
           mountPath: /scripts
+      dnsPolicy: "None"
+      dnsConfig:
+        nameservers:
+          - 8.8.8.8
+        searches:
+          - 9.9.9.9
       volumes:
       - name: wrapper
         configMap:

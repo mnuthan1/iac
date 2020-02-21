@@ -1,0 +1,68 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: spinnaker-deployment-manager
+  namespace: spinnaker
+rules:
+- apiGroups: ["", "extensions", "apps"]
+  resources: ["*"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"] # You can also use ["*"]
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: default-read
+rules:
+- apiGroups: ["", "extensions", "apps"]
+  resources: ["deployments", "replicasets", "pods"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"] # You can also use ["*"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: spinnaker-service-account
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: spinnaker-role-binding
+roleRef:
+  apiGroup: ""
+  kind: Role
+  name: spinnaker-deployment-manager
+subjects:
+- namespace: default
+  kind: ServiceAccount
+  name: spinnaker-service-account
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: default-read-role-binding
+roleRef:
+  apiGroup: ""
+  kind: Role
+  name: default-read
+subjects:
+- namespace: default
+  kind: ServiceAccount
+  name: spinnaker-service-account
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tiller # for helm deployments
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: tiller-role-binding
+roleRef:
+  apiGroup: ""
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- namespace: kube-system
+  kind: ServiceAccount
+  name: tiller

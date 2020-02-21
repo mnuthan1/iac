@@ -19,6 +19,6 @@ helm repo add stable https://kubernetes-charts.storage.googleapis.com/
 export MINIO_ACCESS_KEY=minioaccess
 export MINIO_SECRET_KEY=miniosecret
 
-helm install --set accessKey=${MINIO_ACCESS_KEY},secretKey=${MINIO_SECRET_KEY},persistence.enabled=false \
+helm upgrade --install --set accessKey=${MINIO_ACCESS_KEY},secretKey=${MINIO_SECRET_KEY},persistence.enabled=false \
     minio stable/minio
 
