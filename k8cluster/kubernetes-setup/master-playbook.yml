@@ -13,33 +13,20 @@
         - 10250/tcp
         - 10252/tcp
         - 10255/tcp
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
     - name: reload firewalld service
       service:
         name: firewalld
         enabled: yes
         daemon_reload: yes
         state: restarted
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
-    - name: Disable SWAP since kubernetes can't work with swap enabled (1/2)
-      shell: |
-        swapoff -a
-    - name: Disable SWAP in fstab since kubernetes can't work with swap enabled (2/2)
-      replace:
-        path: /etc/fstab
-        regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
-        replace: '# \1'
-
-    # add node ip as vagrant provides two interfaces
-    - name: include node-ip in kubelet
-      lineinfile: 
-        path: /etc/sysconfig/kubelet 
-        regexp: '^KUBELET_EXTRA_ARGS='
-        line:  KUBELET_EXTRA_ARGS=--node-ip={{node_ip}}
-        
     - name: reload kubelet
       shell: |
         systemctl daemon-reload
         systemctl restart kubelet
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
     - name: initialize the cluster
       command: kubeadm init --apiserver-advertise-address="{{ node_ip }}" --apiserver-cert-extra-sans="{{ node_ip }}" --pod-network-cidr=10.244.0.0/16

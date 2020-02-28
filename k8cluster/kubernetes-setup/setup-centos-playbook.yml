@@ -1,0 +1,62 @@
+# Ansible playbook to setup all nodes in cluster.
+- name: Install basic packages (Cent OS)
+  yum:
+    name: "{{ packages }}"
+    state: latest
+    update_cache: yes
+  vars:
+    packages:
+    - yum-utils
+    - device-mapper-persistent-data
+    - lvm2
+    - ca-certificates
+    - curl
+    - net-tools
+    - tcpdump
+    - docker
+
+- name: start Docker
+  service:
+    name: docker
+    state: started
+
+- name: disable SELinux
+  command: setenforce 0
+- name: disable SELinux on reboot
+  selinux:
+    state: disabled
+- name: ensure net.bridge.bridge-nf-call-ip6tables is set to 1
+  sysctl:
+    name: net.bridge.bridge-nf-call-ip6tables
+    value: 1
+    state: present
+
+- name: ensure net.bridge.bridge-nf-call-iptables is set to 1
+  sysctl:
+    name: net.bridge.bridge-nf-call-iptables
+    value: 1
+    state: present
+
+- name: add Kubernetes' YUM repository
+  yum_repository:
+    name: Kubernetes
+    description: Kubernetes YUM repository
+    baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+    gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+    gpgcheck: yes
+
+- name: Install kubelet, kubeadm (Cent OS)
+  yum:
+    name: "{{ packages }}"
+    state: latest
+    update_cache: yes
+  vars:
+    packages:
+    - kubelet
+    - kubeadm
+# add node ip as vagrant provides two interfaces
+- name: include node-ip in kubelet
+  lineinfile: 
+    path: /etc/sysconfig/kubelet 
+    regexp: '^KUBELET_EXTRA_ARGS='
+    line:  KUBELET_EXTRA_ARGS=--node-ip={{node_ip}}

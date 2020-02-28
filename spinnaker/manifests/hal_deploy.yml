@@ -43,4 +43,4 @@ spec:
       - name: wrapper
         configMap:
           name: wrapper
-          defaultMode: 0744
+          defaultMode: 0777

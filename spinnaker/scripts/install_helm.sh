@@ -1,3 +1,4 @@
+#!/bin/bash
 ##
 # script to install helm on a pod
 #####

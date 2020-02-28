@@ -9,42 +9,20 @@
       loop:
         - 10250/tcp
         - 30000-32767/tcp
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
     - name: reload firewalld service
       service:
         name: firewalld
         enabled: yes
         daemon_reload: yes
         state: restarted
-    - name: Disable SWAP since kubernetes can't work with swap enabled (1/2)
-      shell: |
-        swapoff -a
-    - name: Disable SWAP in fstab since kubernetes can't work with swap enabled (2/2)
-      replace:
-        path: /etc/fstab
-        regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
-        replace: '# \1'
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
     - name: Enable Docker
       shell: |
         systemctl enable docker.service
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
     - name: Copy the join command to server location
       copy: src=join-command dest=/tmp/join-command.sh mode=0777
-    # add node ip as vagrant provides two interfaces
-    - name: include node-ip in kubelet
-      lineinfile: 
-        path: /etc/sysconfig/kubelet 
-        regexp: '^KUBELET_EXTRA_ARGS='
-        line:  KUBELET_EXTRA_ARGS=--node-ip={{node_ip}}
-    #######################
-    # incase of wrong ip in kubectl get nodes -o wide un comment below lines and try
-    #######################
-    #- name: include node-ip in kubelet
-    #  lineinfile:
-    #    path: /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf
-    #    insertbefore: '^ExecStart='
-    #    line: Environment="KUBELET_EXTRA_ARGS=--node-ip={{node_ip}}"
-    - name: reload kubelet
-      shell: |
-        systemctl daemon-reload
-        systemctl restart kubelet
+    
     - name: Join the node to cluster
       command: sh /tmp/join-command.sh

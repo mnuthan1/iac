@@ -1,3 +1,4 @@
+#!/bin/bash
 # Script to configure halyarpod with K8 cluster
 # TO run manually
 #  kubectl exec -it $(kubectl get pods | grep hal) -- bash  (logs into halyard pod)
