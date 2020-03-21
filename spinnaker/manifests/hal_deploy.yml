@@ -17,9 +17,14 @@ spec:
         app: hal
     spec:
       serviceAccountName: spinnaker-service-account
+      securityContext:
+        runAsUser: 0 # on ubuntu nodes with out this it will fail to install openssl
       containers:
       - name: halyard
         image: gcr.io/spinnaker-marketplace/halyard:stable
+        securityContext:
+          capabilities:
+            add: ["NET_ADMIN", "SYS_TIME", "NET_RAW", "SYS_ADMIN"]
         lifecycle:
             postStart:
               exec:
@@ -28,6 +33,7 @@ spec:
                   - "-c"
                   - >
                     cd &&
+                    addgroup spinnaker root &&
                     /scripts/halyard_pod_config_kubectl.sh &&
                     /scripts/install_helm.sh
         volumeMounts:

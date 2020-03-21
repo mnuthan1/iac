@@ -2,7 +2,8 @@ servers = [
     {
         :name => "k8s-master",
         :type => "master",
-        :box => "centos/7",
+        :box => "bento/ubuntu-18.04",
+        #:box  => "centos/7",
         :eth1 => "192.168.205.10",
         :mem => "3048",
         :cpu => "4"
@@ -10,7 +11,8 @@ servers = [
     {
         :name => "node-01",
         :type => "node",
-        :box => "centos/7",
+        :box => "bento/ubuntu-18.04",
+        #:box  => "centos/7",
         :eth1 => "192.168.205.11",
         :mem => "2048",
         :cpu => "2"
@@ -18,7 +20,8 @@ servers = [
     {
         :name => "node-02",
         :type => "node",
-        :box => "centos/7",
+        :box => "bento/ubuntu-18.04",
+        #:box  => "centos/7",
         :eth1 => "192.168.205.12",
         :mem => "2048",
         :cpu => "2"
