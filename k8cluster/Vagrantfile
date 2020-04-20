@@ -5,7 +5,7 @@ servers = [
         :box => "bento/ubuntu-18.04",
         #:box  => "centos/7",
         :eth1 => "192.168.205.10",
-        :mem => "3048",
+        :mem => "4048",
         :cpu => "4"
     },
     {
@@ -14,8 +14,8 @@ servers = [
         :box => "bento/ubuntu-18.04",
         #:box  => "centos/7",
         :eth1 => "192.168.205.11",
-        :mem => "2048",
-        :cpu => "2"
+        :mem => "4048",
+        :cpu => "4"
     },
     {
         :name => "node-02",
@@ -23,8 +23,17 @@ servers = [
         :box => "bento/ubuntu-18.04",
         #:box  => "centos/7",
         :eth1 => "192.168.205.12",
-        :mem => "2048",
-        :cpu => "2"
+        :mem => "4048",
+        :cpu => "4"
+    },
+    {
+        :name => "node-03",
+        :type => "node",
+        :box => "bento/ubuntu-18.04",
+        #:box  => "centos/7",
+        :eth1 => "192.168.205.13",
+        :mem => "4048",
+        :cpu => "4"
     }
 ]
 
