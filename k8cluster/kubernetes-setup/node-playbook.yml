@@ -9,25 +9,20 @@
       loop:
         - 10250/tcp
         - 30000-32767/tcp
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
     - name: reload firewalld service
       service:
         name: firewalld
         enabled: yes
         daemon_reload: yes
         state: restarted
-    - name: Disable SWAP since kubernetes can't work with swap enabled (1/2)
-      shell: |
-        swapoff -a
-    - name: Disable SWAP in fstab since kubernetes can't work with swap enabled (2/2)
-      replace:
-        path: /etc/fstab
-        regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
-        replace: '# \1'
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
     - name: Enable Docker
       shell: |
         systemctl enable docker.service
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
     - name: Copy the join command to server location
       copy: src=join-command dest=/tmp/join-command.sh mode=0777
-
+    
     - name: Join the node to cluster
       command: sh /tmp/join-command.sh

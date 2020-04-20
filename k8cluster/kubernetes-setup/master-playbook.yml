@@ -13,24 +13,23 @@
         - 10250/tcp
         - 10252/tcp
         - 10255/tcp
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
     - name: reload firewalld service
       service:
         name: firewalld
         enabled: yes
         daemon_reload: yes
         state: restarted
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
-    - name: Disable SWAP since kubernetes can't work with swap enabled (1/2)
+    - name: reload kubelet
       shell: |
-        swapoff -a
-    - name: Disable SWAP in fstab since kubernetes can't work with swap enabled (2/2)
-      replace:
-        path: /etc/fstab
-        regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
-        replace: '# \1'
+        systemctl daemon-reload
+        systemctl restart kubelet
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
     - name: initialize the cluster
-      command: kubeadm init --apiserver-advertise-address="{{ node_ip }}" --apiserver-cert-extra-sans="{{ node_ip }}" --pod-network-cidr=192.168.0.0/16
+      command: kubeadm init --apiserver-advertise-address="{{ node_ip }}" --apiserver-cert-extra-sans="{{ node_ip }}" --pod-network-cidr=10.244.0.0/16
 
     - name: Setup kube config for vagrant user
       command: "{{ item }}"

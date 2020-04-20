@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: halyard-deployment
+  labels:
+    app: hal
+  name: hal
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hal
+  template:
+    metadata:
+      labels:
+        app: hal
+    spec:
+      serviceAccountName: spinnaker-service-account
+      securityContext:
+        runAsUser: 0 # on ubuntu nodes with out this it will fail to install openssl
+      containers:
+      - name: halyard
+        image: gcr.io/spinnaker-marketplace/halyard:stable
+        securityContext:
+          capabilities:
+            add: ["NET_ADMIN", "SYS_TIME", "NET_RAW", "SYS_ADMIN"]
+        lifecycle:
+            postStart:
+              exec:
+                command: #configure hal pod with k8 cluster
+                  - "sh"
+                  - "-c"
+                  - >
+                    cd &&
+                    addgroup spinnaker root &&
+                    /scripts/halyard_pod_config_kubectl.sh &&
+                    /scripts/install_helm.sh
+        volumeMounts:
+        - name: wrapper
+          mountPath: /scripts
+      dnsPolicy: "None"
+      dnsConfig:
+        nameservers:
+          - 8.8.8.8
+        searches:
+          - 9.9.9.9
+      volumes:
+      - name: wrapper
+        configMap:
+          name: wrapper
+          defaultMode: 0777

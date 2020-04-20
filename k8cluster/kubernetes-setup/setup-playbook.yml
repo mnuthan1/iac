@@ -2,37 +2,20 @@
 - hosts: all
   become: true
   tasks:
-    - name: Install basic packages
-      yum:
-        name: "{{ packages }}"
-        state: latest
-        update_cache: yes
-      vars:
-        packages:
-        - yum-utils
-        - device-mapper-persistent-data
-        - lvm2
-        - ca-certificates
-        - curl
-        - net-tools
-
-    - name: install Docker
-      yum:
-        name: docker
-        state: present
-        update_cache: true
-
-    - name: start Docker
-      service:
-        name: docker
-        state: started
-
-    - name: disable SELinux
-      command: setenforce 0
-
-    - name: disable SELinux on reboot
-      selinux:
-        state: disabled
+    - name: Disable SWAP since kubernetes can't work with swap enabled (1/2)
+      shell: |
+        swapoff -a
+    - name: Disable SWAP in fstab since kubernetes can't work with swap enabled (2/2)
+      replace:
+        path: /etc/fstab
+        regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+        replace: '# \1'
+    - name: Run Cenos setup
+      include: "setup-centos-playbook.yml"
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+    - name: Run Ubuntu setup
+      include: "setup-ubuntu-playbook.yml"
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
     - name: enable firewalld service
       service:
@@ -40,37 +23,7 @@
         enabled: yes
         daemon_reload: yes
         state: started
-
-    - name: ensure net.bridge.bridge-nf-call-ip6tables is set to 1
-      sysctl:
-        name: net.bridge.bridge-nf-call-ip6tables
-        value: 1
-        state: present
-
-    - name: ensure net.bridge.bridge-nf-call-iptables is set to 1
-      sysctl:
-        name: net.bridge.bridge-nf-call-iptables
-        value: 1
-        state: present
-
-    - name: add Kubernetes' YUM repository
-      yum_repository:
-        name: Kubernetes
-        description: Kubernetes YUM repository
-        baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
-        gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-        gpgcheck: yes
-
-    - name: Install kubelet, kubeadm
-      yum:
-        name: "{{ packages }}"
-        state: latest
-        update_cache: yes
-      vars:
-        packages:
-        - kubelet
-        - kubeadm
-
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
     - name: start kubelet
       service:
         name: kubelet
@@ -81,8 +34,14 @@
 - hosts: k8s-master
   become: yes
   tasks:
-    - name: install kubectl
+    - name: install kubectl (Cent OS)
       yum:
         name: kubectl
         state: present
         allow_downgrade: yes
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+    - name: install kubectl (ubuntu)
+      apt:
+        name: kubectl
+        state: present
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
