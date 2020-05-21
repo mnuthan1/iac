@@ -1,0 +1,9 @@
+[submodule "spin-services/deck/src"]
+	path = spin-services/deck/src
+	url = https://github.com/nuthan-spinnaker/deck.git
+[submodule "spin-services/gate/src"]
+	path = spin-services/gate/src
+	url = https://github.com/nuthan-spinnaker/gate.git
+[submodule "spin-services/front50/src"]
+	path = spin-services/front50/src
+	url = https://github.com/nuthan-spinnaker/front50.git
