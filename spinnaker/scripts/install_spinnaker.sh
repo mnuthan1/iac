@@ -9,9 +9,11 @@ hal config provider docker-registry account add my-docker-registry \
    --address $ADDRESS \
    --repositories $REPOSITORIES
 
-export POD_NAME=$(kubectl get pods --namespace default -l "release=minio" -o jsonpath="{.items[0].metadata.name}")
-kubectl port-forward $POD_NAME 9000 --namespace default&
-export ENDPOINT=127.0.0.1:9000
+#export POD_NAME=$(kubectl get pods --namespace default -l "release=minio" -o jsonpath="{.items[0].metadata.name}")
+#kubectl port-forward $POD_NAME 9000 --namespace default&
+export MINIO_IP=$(kubectl get svc --namespace default -l "release=minio" -o jsonpath="{.items[0].spec.clusterIP}")
+export MINIO_PORT=$(kubectl get svc --namespace default -l "release=minio" -o jsonpath="{.items[0].spec.ports[0].port}")
+export ENDPOINT=${MINIO_IP}:${MINIO_PORT}
 
 export MINIO_ACCESS_KEY=minioaccess
 export MINIO_SECRET_KEY=miniosecret

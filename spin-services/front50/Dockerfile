@@ -36,4 +36,4 @@ RUN chown -R ${USER}:${USER} /sbin/entrypoint && \
 HEALTHCHECK CMD curl http://localhost:${PORT}/health | grep UP || exit 1
 USER ${USER}
 EXPOSE ${PORT}/tcp
-ENTRYPOINT ["tail -f /dev/null"]
+ENTRYPOINT ["tail", "-f", "/dev/null"]
