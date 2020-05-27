@@ -15,8 +15,9 @@ export MINIO_IP=$(kubectl get svc --namespace default -l "release=minio" -o json
 export MINIO_PORT=$(kubectl get svc --namespace default -l "release=minio" -o jsonpath="{.items[0].spec.ports[0].port}")
 export ENDPOINT=${MINIO_IP}:${MINIO_PORT}
 
-export MINIO_ACCESS_KEY=minioaccess
-export MINIO_SECRET_KEY=miniosecret
+## using secrets
+#export MINIO_ACCESS_KEY=minioaccess
+#export MINIO_SECRET_KEY=miniosecret
 # setup storage for HAL
 echo $MINIO_SECRET_KEY | hal config storage s3 edit --endpoint $ENDPOINT \
    --access-key-id $MINIO_ACCESS_KEY \

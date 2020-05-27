@@ -22,6 +22,17 @@ spec:
       containers:
       - name: halyard
         image: gcr.io/spinnaker-marketplace/halyard:stable
+        env:
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-secret
+              key: MINIO_ACCESS_KEY
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-secret
+              key: MINIO_SECRET_KEY
         securityContext:
           capabilities:
             add: ["NET_ADMIN", "SYS_TIME", "NET_RAW", "SYS_ADMIN"]

@@ -17,8 +17,10 @@ helm repo add stable https://kubernetes-charts.storage.googleapis.com/
 #This chart provisions a PersistentVolumeClaim and mounts corresponding persistent volume to default location /export. You'll need physical storage available in the Kubernetes cluster for this to work. If you'd rather use emptyDir, disable PersistentVolumeClaim by
 # diable persistence
 # reference : https://github.com/helm/charts/tree/master/stable/minio
-export MINIO_ACCESS_KEY=minioaccess
-export MINIO_SECRET_KEY=miniosecret
+
+# using secrets
+#export MINIO_ACCESS_KEY=minioaccess
+#export MINIO_SECRET_KEY=miniosecret
 
 helm upgrade --install --set accessKey=${MINIO_ACCESS_KEY},secretKey=${MINIO_SECRET_KEY},persistence.enabled=false \
     minio stable/minio
