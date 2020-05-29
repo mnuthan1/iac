@@ -35,8 +35,6 @@ kubectl exec -it hal-648bf9c9b6-rrltn  -- bash
 
 **NOTE** This will always install latest spinnaker version, no need to update the version
 
-**NOTE** Look for `MINIO_ACCESS_KEY` and `MINIO_SECRET_KEY` in `install_helm.sh` and `install_spinnaker.sh` both should match
-
 ## Custom Spinnaker Service image
 In order to deploy custom Spinnaker image
 

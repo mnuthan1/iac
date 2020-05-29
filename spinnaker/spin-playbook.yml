@@ -6,6 +6,8 @@
        
         - name: "Create Spinnkaer namespace"
           shell: "kubectl apply -f ./manifests/spin_namespace.yml"
+        - name: "Create Minio secrets"
+          shell: "kubectl apply -f ./manifests/minio_secrets.yml"
         - name: "Create Spinnkaer Service accounts"
           shell: "kubectl apply -f ./manifests/spin_acct.yml"
         - name: "Create Spinnkaer services"
