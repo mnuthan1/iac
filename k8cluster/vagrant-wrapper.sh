@@ -1,9 +1,11 @@
 vagrant up k8s-master
-
-vagrant status | \
-awk '
-BEGIN{ tog=0; }
-/^$/{ tog=!tog; }
-/./ { if(tog){print $1} }
-' | \
-xargs -P2 -I {} vagrant up {}
+if [ $? -eq 0 ];
+then
+    vagrant status | grep -v k8s-master | \
+    awk '
+    BEGIN{ tog=0; }
+    /^$/{ tog=!tog; }
+    /./ { if(tog){print $1} }
+    ' | \
+    xargs -P3 -I {} vagrant up {}
+fi
