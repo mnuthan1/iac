@@ -1,0 +1,32 @@
+
+storage:
+    # default local storage class creation and PV creation
+    # if your cluster doesn't have default storage class and Volume then set create: true
+    create: true
+    path: /export
+    node: k8s-master
+
+halyard:
+    spinnakerVersion: 1.19.2
+    image:
+        repository: gcr.io/spinnaker-marketplace/halyard
+        tag: latest
+#sub charts
+minio:
+    accessKey: myaccesskey
+    secretKey: mysecretkey
+    persistence:
+        enabled: false
+    tls:
+        enabled: true
+        certSecret: tls-ssl-minio
+
+redis:
+    master:
+        persistence:
+            size: 100Mi
+            matchLabels: 
+                name: redis
+    cluster:
+        enabled: false
+        

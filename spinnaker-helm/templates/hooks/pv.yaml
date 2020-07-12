@@ -1,0 +1,25 @@
+{{ if .Values.storage.create }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis-local-pv
+  labels:
+    name: redis
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: {{ .Release.Name }}-local-storage
+  local:
+    path: {{ .Values.storage.path}}
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - {{ .Values.storage.node}}
+{{ end }}

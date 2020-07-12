@@ -1,0 +1,16 @@
+apiVersion: v2
+name: spinnaker-deploy
+description: A Helm chart to deploy Spinnaker
+version: 0.1.0
+keywords:
+    - spinnaker
+type: application
+appVersion: "1.19.2"
+dependencies:
+    - name: redis
+      version: 10.5.7
+      repository: https://kubernetes-charts.storage.googleapis.com/
+      condition: redis.enabled
+    - name: minio
+      version: 5.0.26
+      repository: https://kubernetes-charts.storage.googleapis.com/

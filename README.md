@@ -10,6 +10,8 @@ Follow instructions to setup local cluster [Create local K8 cluster](k8cluster/R
 
 Follow instructions to Install Spinnaker [Create local K8 cluster](spinnaker/README.md)
 
+## install Spinnaker with helm
+
 ## Create custom Spinnaker micro services (optional)
 
 if you would like to create your own custom spinnaker micro-services then follow instructions [Custom Spinnaker services] (spin-services/README.md)
